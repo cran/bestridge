@@ -45,22 +45,10 @@ lm.groupbsrr <- bsrr(Data$x, Data$y, s.min = 1, s.max = 8, group.index = group.i
 
 summary(lm.groupbsrr)
 
-#-------------------summary for bsrr.one----------------------#
-Data <- gen.data(n, p, k, rho, family = "gaussian", beta = Tbeta, seed = seed)
-lm.bsrr <- bsrr.one(Data$x, Data$y, s = 5, lambda = 0.01)
-
-summary(lm.bsrr)
-
-}
-\references{
-Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
-Package for Best Subset Selection in Linear, Logistic and Cox Proportional
-Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
-doi:10.18637/jss.v094.i04.
 }
 \seealso{
 \code{\link{bsrr}}.
 }
 \author{
-Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
+Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu, Canhong Wen and Xueqin Wang.
 }

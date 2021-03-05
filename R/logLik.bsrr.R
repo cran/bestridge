@@ -25,12 +25,8 @@
 #' For \code{bsrr} objects fitted by \code{gsection}, \code{pgsection} and \code{psequential}, the returned vector
 #' contains log-likelihood for fitted models in each iteration. The coefficients of those model can be extracted
 #' from \code{beta.all} and \code{coef0.all} in the \code{bsrr} object.
-#' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
 #' @seealso \code{\link{bsrr}}, \code{\link{summary.bsrr}}.
-#' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
-#' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
-#' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
-#' doi:10.18637/jss.v094.i04.
+#' @inherit bsrr return author
 #' @examples
 #'
 #' # Generate simulated data
@@ -51,8 +47,6 @@
 #'@export
 #'@export logLik.bsrr
 #'@method logLik bsrr
-
-
 logLik.bsrr <- function(object, best.model = TRUE,...){
   n=object$nsample
   if(best.model){

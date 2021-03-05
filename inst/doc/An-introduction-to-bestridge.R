@@ -33,9 +33,9 @@ logi.bsrr <- bsrr(x, y, family = "binomial")
 plot(logi.bsrr)
 
 ## ---- warning=FALSE, message = FALSE------------------------------------------
-data(LymphomaData, package = "HCmodelSets")
+data(patient.data)
 
-x <- t(patient.data$x)
+x <- patient.data$x
 y <- patient.data$time
 status <- patient.data$status
 

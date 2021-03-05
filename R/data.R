@@ -28,8 +28,20 @@ NULL
 #' estrogen receptor-positive (y = 0) and estrogen receptor-negative (y = 1).
 #' The other variables contain the expression level of the considered genes.
 #'
-#' @format A data frame with 86 rows and 501 variables,
+#' @format A data frame with 46 rows and 7130 variables,
 #' where the first variable is the label of estrogen receptor-positive/negative,
-#' and the remaining 500 variables are 500 gene.
+#' and the remaining 7129 variables are 7129 gene.
 #' @references M. West, C. Blanchette, H. Dressman, E. Huang, S. Ishida, R. Spang, H. Zuzan, J.A. Olson, Jr., J.R. Marks and Joseph R. Nevins (2001) <doi:10.1073/pnas.201162998> Predicting the clinical status of human breast cancer by using gene expression profiles, Proceedings of the National Academy of Sciences of the USA, Vol 98(20), 11462-11467.
+NULL
+
+#' @title Lymphoma patients data set
+#' @name patient.data
+#' @docType data
+#' @details A subset of the data set of lymphoma patients used in the study of Alizadeh et al. (2000) and also Simon et al.
+#' (2011).
+#'
+#' @format patient.data A list with survival times, staus and covariates from patients.
+#' @references Alizadeh, A. A., et al. (2000). Distinct types of diffuse large B-cell lymphoma identified by gene
+#' expression profiling. Nature, 403(6769), p.503
+#' Simon, N., Friedman, J., Hastie, T., & Tibshirani, R. (2011). Regularization paths for Cox's proportional hazards model via coordinate descent. Journal of statistical software, 39(5), 1.
 NULL

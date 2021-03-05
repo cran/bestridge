@@ -5,9 +5,9 @@
 \alias{duke}
 \title{Duke breast cancer data}
 \format{
-A data frame with 86 rows and 501 variables,
+A data frame with 46 rows and 7130 variables,
 where the first variable is the label of estrogen receptor-positive/negative,
-and the remaining 500 variables are 500 gene.
+and the remaining 7129 variables are 7129 gene.
 }
 \description{
 This data set details microarray experiment for breast cancer patients.

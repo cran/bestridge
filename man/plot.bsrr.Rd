@@ -5,12 +5,36 @@
 \title{Produces a coefficient profile plot of the coefficient or loss function
 paths}
 \usage{
-\method{plot}{bsrr}(x, sign.lambda = 0, ...)
+\method{plot}{bsrr}(
+  x,
+  type = c("tune", "coefficients"),
+  lambda = NULL,
+  sign.lambda = 0,
+  breaks = T,
+  K = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{"bsrr"} object.}
 
-\item{sign.lambda}{A logical value indicating whether to show lambda on log scale. Default is 0.}
+\item{type}{One of \code{"tune"}, \code{"coefficients"}, \code{"both"}.
+For \code{"bsrr"} with \eqn{L_2} shrinkage:
+If (\code{type = "tune"}), the path of corresponding information criterion
+or cross-validation loss is provided;
+If \code{type = "coefficients"}, a lambda should be provided and and this funciton provides a coefficient profile plot of the coefficient;
+For \code{"bsrr"} object without \eqn{L_2} shrinkage:
+If \code{type = "tune"}, a path of lcorresponding information criterion or cross-validation loss is provided.
+If \code{type = "coefficients"}, it provides a coefficient profile plot of the coefficient.}
+
+\item{lambda}{For \code{"bsrr"} with \eqn{L_2} shrinkage: To plot the change of coefficients with lambda equals this value for \code{type = "coefficients"} or \code{type = "both"}.}
+
+\item{sign.lambda}{For \code{"bsrr"} with \eqn{L_2} shrinkage: A logical value indicating whether to show lambda on log scale. Default is 0.}
+
+\item{breaks}{For \code{"bsrr"} object without \eqn{L_2} shrinkage: If \code{TRUE}, a vertical line is drawn at a specified break point in
+the coefficient paths.}
+
+\item{K}{For \code{"bsrr"} object without \eqn{L_2} shrinkage: Which break point should the vertical line be drawn at. Default is the optimal model size.}
 
 \item{\dots}{Other graphical parameters to plot}
 }
@@ -38,17 +62,10 @@ lm.bsrr <- bsrr(Data$x, Data$y, method = "pgsection")
 # generate plots
 plot(lm.bsrr)
 
-
-}
-\references{
-Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
-Package for Best Subset Selection in Linear, Logistic and Cox Proportional
-Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
-doi:10.18637/jss.v094.i04.
 }
 \seealso{
 \code{\link{bsrr}}.
 }
 \author{
-Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
+Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu, Canhong Wen and Xueqin Wang.
 }

@@ -39,15 +39,9 @@ lambda.list <- exp(seq(log(5), log(0.1), length.out = 10))
 lm.bsrr <- bsrr(Data$x, Data$y, method = "pgsection")
 coef(lm.bsrr)
 }
-\references{
-Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
-Package for Best Subset Selection in Linear, Logistic and Cox Proportional
-Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
-doi:10.18637/jss.v094.i04.
-}
 \seealso{
 \code{\link{bsrr}}, \code{\link{print.bsrr}}.
 }
 \author{
-Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
+Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu, Canhong Wen and Xueqin Wang.
 }

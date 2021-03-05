@@ -6,14 +6,21 @@
 #'
 #'
 #' @param x A \code{"bsrr"} object.
-#' @param sign.lambda A logical value indicating whether to show lambda on log scale. Default is 0.
+#' @param type One of \code{"tune"}, \code{"coefficients"}, \code{"both"}.
+#' For \code{"bsrr"} with \eqn{L_2} shrinkage:
+#' If (\code{type = "tune"}), the path of corresponding information criterion
+#' or cross-validation loss is provided;
+#' If \code{type = "coefficients"}, a lambda should be provided and and this funciton provides a coefficient profile plot of the coefficient;
+#' For \code{"bsrr"} object without \eqn{L_2} shrinkage:
+#' If \code{type = "tune"}, a path of lcorresponding information criterion or cross-validation loss is provided.
+#' If \code{type = "coefficients"}, it provides a coefficient profile plot of the coefficient.
+#' @param lambda For \code{"bsrr"} with \eqn{L_2} shrinkage: To plot the change of coefficients with lambda equals this value for \code{type = "coefficients"} or \code{type = "both"}.
+#' @param sign.lambda For \code{"bsrr"} with \eqn{L_2} shrinkage: A logical value indicating whether to show lambda on log scale. Default is 0.
+#' @param breaks For \code{"bsrr"} object without \eqn{L_2} shrinkage: If \code{TRUE}, a vertical line is drawn at a specified break point in
+#' the coefficient paths.
+#' @param K For \code{"bsrr"} object without \eqn{L_2} shrinkage: Which break point should the vertical line be drawn at. Default is the optimal model size.
 #' @param \dots Other graphical parameters to plot
-#' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
 #' @seealso \code{\link{bsrr}}.
-#' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
-#' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
-#' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
-#' doi:10.18637/jss.v094.i04.
 #' @return
 #' No return value, called for plots generation
 #' @examples
@@ -33,23 +40,21 @@
 #' # generate plots
 #' plot(lm.bsrr)
 #'
+#'@inherit bsrr return author
 #'
 #'@method plot bsrr
 #'@export
 #'@export plot.bsrr
-plot.bsrr<-function(x, sign.lambda = 0, ...)
+plot.bsrr<-function(x, type=c( "tune", "coefficients"),lambda = NULL, sign.lambda = 0, breaks=T, K=NULL, ...)
 {
   originalpar <- par(no.readonly = TRUE)
   on.exit(par(originalpar))
-  breaks=T
-  type="both"
-  K=NULL
+  type <- match.arg(type)
   if(!is.null(x$bsrr.one)) stop("Plots for object from bsrr.one are not available.")
   if(x$algorithm_type == "GPDAS" | x$algorithm_type == "GL0L2") stop("Plots for group selection are not available now.")
   if(x$algorithm_type == "PDAS"){
     type <- match.arg(type)
     # s.list=x$s.list
-
 
     if(is.null(K))  K <- length(which(x$beta!=0))#K<-df_list[length(df_list)]
     # if(x$family=="gaussian") dev=x$mse else dev=x$deviance
@@ -104,7 +109,21 @@ plot.bsrr<-function(x, sign.lambda = 0, ...)
     }
   } else{
     # plot_l0l2(x, sign.lambda, threeD)
-    plot_heatmap(x,sign.lambda)
+    if(type=="coefficients"){
+      if(is.null(lambda)) lambda = x$lambda
+      plot_coef_l0l2(x, lambda)
+    }else if(type == "tune"){
+      plot_heatmap(x,sign.lambda)
+    }else{
+      if(is.null(lambda)) lambda = x$lambda
+      layout(matrix(c(1,2),2,1,byrow=TRUE),heights=c(0.45,0.55), widths=1)
+      oldpar <- par(las=1, mar=c(2,4,2,4), oma=c(2.5,0.5,1.5,0.5))
+      plot_heatmap(x,sign.lambda)
+      plot_coef_l0l2(x, lambda)
+      par(oldpar)
+      par(mfrow=c(1,1))
+    }
+
   }
 }
 
@@ -167,6 +186,258 @@ plot_solution <- function(beta, df, K, breaks = TRUE, mar = c(3,4,0,4)){
 
   par(oldpar)
 }
+
+plot_coef_l0l2 <- function(x, lambda){
+  if(x$method != "sequential"){
+    beta_mat = cbind(0, x$beta.all[, which(x$lambda.all == lambda)])
+  }
+  else{
+    ind = which(x$lambda.list == lambda)
+    beta_mat = cbind(rep(0, nrow(x$beta.all[[ind]])), x$beta.all[[ind]])
+  }
+  df_list = apply(beta_mat, 2, function(x){sum(ifelse(abs(x) < 1e-6, 0, 1))})
+  breaks=F
+  K=NULL
+  plot_solution(beta_mat, c(df_list), K,breaks)
+}
+
+plot_heatmap <- function(x, sign.lambda){
+
+  # plot.new()                            # empty plot
+  # plot.window(range(df), range(x$lambda.list), xaxs="i")
+  # oldpar <- par(mar = mar,              # no bottom spacing
+  #               lend="square")          # square line ends
+  # par(new=TRUE, oldpar)                         # add to the plot
+  # sequential path
+  if(x$method == "sequential"){
+    #val = ifelse(is.null(x$ic.all), x$cvm.all, x$ic.all)
+    if(x$ic.type == "cv"){
+      val = x$cvm.all
+    } else{
+      val = x$ic.all
+    }
+    if(length(x$lambda.list>15)){
+      lambda_col =x$lambda.list
+
+      if(sign.lambda)
+        colnames(val) = exp(lambda_col)
+      else
+        colnames(val) = lambda_col
+      lambda_col[5*(1:ceiling(length(lambda_col)/5))] = round(lambda_col[5*(1:ceiling(length(lambda_col)/5))], 3)
+      lambda_col[-5*(1:ceiling(length(lambda_col)/5))] = ""
+    } else{
+      colnames(val) = round(x$lambda.list, 3)
+      if(sign.lambda) colnames(val) = exp(as.numeric(colnames(val)))
+    }
+    s_row = x$s.list
+    if(length(s_row)>15){
+      s_row[-5*(1:ceiling(length(s_row)/5))] = ""
+    }
+    rownames(val) = s_row
+    colnames(val) = lambda_col
+    # if(is.null(col)) col = heat.colors(nrow(x$ic.all) * ncol(x$ic.all))
+    if(x$ic.type == "cv"){
+      pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none",  xlab = "lambda", ylab = "model size", main = "Cross-validation error")
+    } else{
+      main = x$ic.type
+      pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none",
+               xlab = "lambda", ylab = "model size", main = main)
+    }
+    # powell path
+  } else{
+    df_list <- apply(x$beta.all, 2, function(x){sum(ifelse(abs(x) < 1e-8, 0, 1))})
+    ## line search = sequential
+    if(x$line.search == "sequential"){
+      lambda.list = exp(seq(log(x$lambda.min), log(x$lambda.max),length.out = x$nlambda))
+      s.list = x$s.min : x$s.max
+      val = x$ic_mat
+      # for(i in 1:length(x$lambda.all)){
+      #   print(i)
+      #   row_ind = which(s.list == df_list[i])
+      #   col_ind = which(Isequal(x$lambda.all[i], lambda.list))
+      #   # print(paste("col",col_ind))
+      #   if(is.na(val[row_ind, col_ind])){
+      #     val[row_ind, col_ind] = x$ic.all[i]
+      #   } else{
+      #     val[row_ind, col_ind] = pmin(val[row_ind, col_ind], x$ic.all[i])
+      #   }
+      # }
+
+      if(length(lambda.list>15)){
+        lambda_col = lambda.list
+        lambda_col[5*(1:ceiling(length(lambda_col)/5))] = round(lambda.list[5*(1:ceiling(length(lambda.list)/5))], 3)
+        # lambda_col[-5*(1:ceiling(length(lambda_col)/5))] = ""
+        if(sign.lambda) colnames(val) = exp(lambda_col)
+        else colnames(val) = lambda_col
+        colnames(val)[-5*(1:ceiling(length(lambda_col)/5))] = ""
+      } else{
+        colnames(val) = round(lambda.list, 3)
+        if(sign.lambda) colnames(val) = exp(as.numeric(colnames(val)))
+      }
+      s_row = s.list
+      if(length(s_row)>15){
+        s_row[-5*(1:ceiling(length(s_row)/5))] = ""
+      }
+      rownames(val) = s_row
+      colnames(val) = lambda_col
+      #if(is.null(col)) col =heat.colors(length(x$lambda.all))
+      if(x$ic.type == "cv"){
+        # heatmap(val, Colv=NA, Rowv = NA, scale="none", col = col, xlab = "lambda", ylab = "model size", main = "Cross-validation error")
+        pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", xlab = "lambda",
+                 ylab = "model size", main = "Cross-validation error",na_col = "gray")
+        # setHook("grid.newpage", NULL, "replace")
+        # grid.text("xlabel example", y=-0.07, gp=gpar(fontsize=16))
+        # grid.text("ylabel example", x=-0.07, rot=90, gp=gpar(fontsize=16))
+      } else{
+        main = x$ic.type
+        # heatmap(val, Colv=NA, Rowv = NA ,scale="none", col = col, xlab = "lambda", ylab = "model size", main = main)
+        pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", xlab = "lambda",
+                 ylab = "model size", main = main,na_col = "gray")
+      }
+      ## line search = gsection
+    }else{
+      lambda.list = exp(seq(log(x$lambda.min), log(x$lambda.max),length.out = 100))
+      s.list = x$s.min : x$s.max
+      # val = matrix(NA, nrow = length(s.list), ncol = 100)
+      # for(i in 1:length(x$lambda.all)){
+      #   lower_ind = which(lambda.list <= x$lambda.all[i])[1]
+      #   upper_ind = ifelse(lower_ind + 1 > 100, 100, lower_ind + 1)
+      #   col_ind = ifelse(abs(lambda.list[lower_ind] - x$lambda.all[i]) < abs(lambda.list[lower_ind] - x$lambda.all[i]), lower_ind, upper_ind)
+      #   row_ind = which(s.list == df_list[i])
+      #   if(is.na(val[row_ind, col_ind])){
+      #     val[row_ind, col_ind] = x$ic.all[i]
+      #   } else{
+      #     val[row_ind, col_ind] = pmin(val[row_ind, col_ind], x$ic.all[i])
+      #   }
+      # }
+      val = x$ic_mat
+      lambda_breaks = matrix(lambda.list, nrow = length(lambda.list))
+      lambda_breaks[5*(1:20)] <-  round(lambda_breaks[5*(1:20)], 3)
+      lambda_breaks[-(5*(1:20))] <-  ""
+      colnames(val) <- lambda_breaks
+      if(sign.lambda) colnames(val) = exp(lambda_breaks)
+      colnames(val)[-(5*(1:20))] <-  ""
+      s_row = s.list
+      if(length(s_row)>15){
+        s_row[-5*(1:ceiling(length(s_row)/5))] = ""
+      }
+      rownames(val) = s_row
+      #val[which(is.na(val))] = min(x$ic.all - 10)
+      #if(is.null(col)) col = heat.colors(length(x$lambda.all))
+      if(x$ic.type == "cv"){
+        pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", #color = col,
+                 xlab = "lambda", ylab = "model size", main = "Cross-validation error", na_col = "gray"
+        )
+      } else{
+        main = x$ic.type
+        pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", #color = col,
+                 xlab = "lambda", ylab = "model size", main = main, na_col = "gray"
+        )
+      }
+    }
+  }
+  # par(oldpar)
+}
+
+# plot_heatmap <- function(x, col){
+#   # sequential path
+#   if(x$method == "sequential"){
+#     val = x$ic.all
+#     if(length(x$lambda.list>15)){
+#       lambda_col = x$lambda.list
+#       lambda_col[5*(1:ceiling(length(lambda_col)/5))] = round(x$lambda.list[5*(1:ceiling(length(x$lambda.list)/5))], 3)
+#       lambda_col[-5*(1:ceiling(length(lambda_col)/5))] = ""
+#       colnames(val) = lambda_col
+#     } else{
+#       colnames(val) = round(x$lambda.list, 3)
+#     }
+#     rownames(val) = x$s.list
+#     if(is.null(col)) col = heat.colors(nrow(x$ic.all) * ncol(x$ic.all))
+#     if(x$ic.type == "cv"){
+#       pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col, xlab = "lambda", ylab = "model size", main = "Cross-validation error")
+#     } else{
+#       main = x$ic.type
+#       pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col, xlab = "lambda", ylab = "model size", main = main)
+#     }
+#   # powell path
+#   } else{
+#     df_list <- apply(x$beta.all, 2, function(x){sum(ifelse(abs(x) < 1e-8, 0, 1))})
+#     ## line search = sequential
+#     if(x$line.search == "sequential"){
+#       lambda.list = exp(seq(log(x$lambda.max), log(x$lambda.min),length.out = x$nlambda))
+#       s.list = x$s.min : x$s.max
+#       val = matrix(NA, nrow = length(s.list), ncol = x$nlambda)
+#       for(i in 1:length(x$lambda.all)){
+#         print(i)
+#         row_ind = which(s.list == df_list[i])
+#         col_ind = which(Isequal(x$lambda.all[i], lambda.list))
+#         # print(paste("col",col_ind))
+#         if(is.na(val[row_ind, col_ind])){
+#           val[row_ind, col_ind] = x$ic.all[i]
+#         } else{
+#           val[row_ind, col_ind] = pmin(val[row_ind, col_ind], x$ic.all[i])
+#         }
+#       }
+#
+#       if(length(lambda.list>15)){
+#         lambda_col = lambda.list
+#         lambda_col[5*(1:ceiling(length(lambda_col)/5))] = round(lambda.list[5*(1:ceiling(length(lambda.list)/5))], 3)
+#         lambda_col[-5*(1:ceiling(length(lambda_col)/5))] = ""
+#         colnames(val) = lambda_col
+#       } else{
+#         colnames(val) = round(lambda.list, 3)
+#       }
+#       rownames(val) = s.list
+#       if(is.null(col)) col =heat.colors(length(x$lambda.all))
+#       if(x$ic.type == "cv"){
+#         # heatmap(val, Colv=NA, Rowv = NA, scale="none", col = col, xlab = "lambda", ylab = "model size", main = "Cross-validation error")
+#         pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col, xlab = "lambda",
+#                  ylab = "model size", main = "Cross-validation error", na_col = "white")
+#       } else{
+#         main = x$ic.type
+#         # heatmap(val, Colv=NA, Rowv = NA ,scale="none", col = col, xlab = "lambda", ylab = "model size", main = main)
+#         pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col, xlab = "lambda",
+#                  ylab = "model size", main = main, na_col = "white")
+#       }
+#     ## line search = gsection
+#     }else{
+#       lambda.list = exp(seq(log(x$lambda.max), log(x$lambda.min),length.out = 100))
+#       s.list = x$s.min : x$s.max
+#       val = matrix(NA, nrow = length(s.list), ncol = 100)
+#       for(i in 1:length(x$lambda.all)){
+#         lower_ind = which(lambda.list <= x$lambda.all[i])[1]
+#         upper_ind = ifelse(lower_ind + 1 > 100, 100, lower_ind + 1)
+#         col_ind = ifelse(abs(lambda.list[lower_ind] - x$lambda.all[i]) < abs(lambda.list[lower_ind] - x$lambda.all[i]), lower_ind, upper_ind)
+#         row_ind = which(s.list == df_list[i])
+#         if(is.na(val[row_ind, col_ind])){
+#           val[row_ind, col_ind] = x$ic.all[i]
+#         } else{
+#           val[row_ind, col_ind] = pmin(val[row_ind, col_ind], x$ic.all[i])
+#         }
+#       }
+#       lambda_breaks = matrix(lambda.list, nrow = length(lambda.list))
+#       lambda_breaks[5*(1:20)] <-  round(lambda_breaks[5*(1:20)], 3)
+#       lambda_breaks[-(5*(1:20))] <-  ""
+#       colnames(val) <- lambda_breaks
+#       rownames(val) = s.list
+#       #val[which(is.na(val))] = min(x$ic.all - 10)
+#       if(is.null(col)) col = heat.colors(length(x$lambda.all))
+#       if(x$ic.type == "cv"){
+#         pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col,
+#                  xlab = "lambda", ylab = "model size", main = "Cross-validation error", na_col = "white")
+#       } else{
+#         main = x$ic.type
+#         pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col,
+#                  xlab = "lambda", ylab = "model size", main = main, na_col = "white")
+#       }
+#     }
+#   }
+# }
+
+# Isequal <- function(x, y){
+#   return(ifelse(abs(x-y)<1e-5, TRUE, FALSE))
+# }
+
 
 # plot_l0l2 <- function(x, sign.lambda, threeD){
 #   # 3D
@@ -310,231 +581,3 @@ plot_solution <- function(beta, df, K, breaks = TRUE, mar = c(3,4,0,4)){
 #     }
 #   }
 # }
-
-plot_heatmap <- function(x, sign.lambda){
-  # sequential path
-  if(x$method == "sequential"){
-    #val = ifelse(is.null(x$ic.all), x$cvm.all, x$ic.all)
-    if(x$ic.type == "cv"){
-      val = x$cvm.all
-    } else{
-      val = x$ic.all
-    }
-    if(length(x$lambda.list>15)){
-      lambda_col =x$lambda.list
-
-      if(sign.lambda)
-        colnames(val) = exp(lambda_col)
-      else
-        colnames(val) = lambda_col
-      lambda_col[5*(1:ceiling(length(lambda_col)/5))] = round(lambda_col[5*(1:ceiling(length(lambda_col)/5))], 3)
-      lambda_col[-5*(1:ceiling(length(lambda_col)/5))] = ""
-    } else{
-      colnames(val) = round(x$lambda.list, 3)
-      if(sign.lambda) colnames(val) = exp(colnames(val))
-    }
-    s_row = x$s.list
-    if(length(s_row)>15){
-      s_row[-5*(1:ceiling(length(s_row)/5))] = ""
-    }
-    rownames(val) = s_row
-    colnames(val) = lambda_col
-   # if(is.null(col)) col = heat.colors(nrow(x$ic.all) * ncol(x$ic.all))
-    if(x$ic.type == "cv"){
-      pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none",  xlab = "lambda", ylab = "model size", main = "Cross-validation error")
-    } else{
-      main = x$ic.type
-      pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", xlab = "lambda", ylab = "model size", main = main)
-    }
-    # powell path
-  } else{
-    df_list <- apply(x$beta.all, 2, function(x){sum(ifelse(abs(x) < 1e-8, 0, 1))})
-    ## line search = sequential
-    if(x$line.search == "sequential"){
-      lambda.list = exp(seq(log(x$lambda.min), log(x$lambda.max),length.out = x$nlambda))
-      s.list = x$s.min : x$s.max
-      val = x$ic_mat
-      # for(i in 1:length(x$lambda.all)){
-      #   print(i)
-      #   row_ind = which(s.list == df_list[i])
-      #   col_ind = which(Isequal(x$lambda.all[i], lambda.list))
-      #   # print(paste("col",col_ind))
-      #   if(is.na(val[row_ind, col_ind])){
-      #     val[row_ind, col_ind] = x$ic.all[i]
-      #   } else{
-      #     val[row_ind, col_ind] = pmin(val[row_ind, col_ind], x$ic.all[i])
-      #   }
-      # }
-
-      if(length(lambda.list>15)){
-        lambda_col = lambda.list
-        lambda_col[5*(1:ceiling(length(lambda_col)/5))] = round(lambda.list[5*(1:ceiling(length(lambda.list)/5))], 3)
-        lambda_col[-5*(1:ceiling(length(lambda_col)/5))] = ""
-        if(sign.lambda) colnames(val) = exp(lambda_col)
-        else colnames(val) = lambda_col
-      } else{
-        colnames(val) = round(lambda.list, 3)
-        if(sign.lambda) colnames(val) = exp(colnames(val))
-      }
-      s_row = s.list
-      if(length(s_row)>15){
-        s_row[-5*(1:ceiling(length(s_row)/5))] = ""
-      }
-      rownames(val) = s_row
-      colnames(val) = lambda_col
-      #if(is.null(col)) col =heat.colors(length(x$lambda.all))
-      if(x$ic.type == "cv"){
-        # heatmap(val, Colv=NA, Rowv = NA, scale="none", col = col, xlab = "lambda", ylab = "model size", main = "Cross-validation error")
-        pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", xlab = "lambda",
-                 ylab = "model size", main = "Cross-validation error",na_col = "gray")
-        # setHook("grid.newpage", NULL, "replace")
-        # grid.text("xlabel example", y=-0.07, gp=gpar(fontsize=16))
-        # grid.text("ylabel example", x=-0.07, rot=90, gp=gpar(fontsize=16))
-      } else{
-        main = x$ic.type
-        # heatmap(val, Colv=NA, Rowv = NA ,scale="none", col = col, xlab = "lambda", ylab = "model size", main = main)
-        pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", xlab = "lambda",
-                 ylab = "model size", main = main,na_col = "gray")
-      }
-      ## line search = gsection
-    }else{
-      lambda.list = exp(seq(log(x$lambda.min), log(x$lambda.max),length.out = 100))
-      s.list = x$s.min : x$s.max
-      # val = matrix(NA, nrow = length(s.list), ncol = 100)
-      # for(i in 1:length(x$lambda.all)){
-      #   lower_ind = which(lambda.list <= x$lambda.all[i])[1]
-      #   upper_ind = ifelse(lower_ind + 1 > 100, 100, lower_ind + 1)
-      #   col_ind = ifelse(abs(lambda.list[lower_ind] - x$lambda.all[i]) < abs(lambda.list[lower_ind] - x$lambda.all[i]), lower_ind, upper_ind)
-      #   row_ind = which(s.list == df_list[i])
-      #   if(is.na(val[row_ind, col_ind])){
-      #     val[row_ind, col_ind] = x$ic.all[i]
-      #   } else{
-      #     val[row_ind, col_ind] = pmin(val[row_ind, col_ind], x$ic.all[i])
-      #   }
-      # }
-      val = x$ic_mat
-      lambda_breaks = matrix(lambda.list, nrow = length(lambda.list))
-      lambda_breaks[5*(1:20)] <-  round(lambda_breaks[5*(1:20)], 3)
-      lambda_breaks[-(5*(1:20))] <-  ""
-      colnames(val) <- lambda_breaks
-      if(sign.lambda) colnames(val) = exp(colnames(val))
-      s_row = s.list
-      if(length(s_row)>15){
-        s_row[-5*(1:ceiling(length(s_row)/5))] = ""
-      }
-      rownames(val) = s_row
-      #val[which(is.na(val))] = min(x$ic.all - 10)
-      #if(is.null(col)) col = heat.colors(length(x$lambda.all))
-      if(x$ic.type == "cv"){
-        pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", #color = col,
-                 xlab = "lambda", ylab = "model size", main = "Cross-validation error", na_col = "gray"
-                 )
-      } else{
-        main = x$ic.type
-        pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", #color = col,
-                 xlab = "lambda", ylab = "model size", main = main, na_col = "gray"
-                 )
-      }
-    }
-  }
-}
-
-# plot_heatmap <- function(x, col){
-#   # sequential path
-#   if(x$method == "sequential"){
-#     val = x$ic.all
-#     if(length(x$lambda.list>15)){
-#       lambda_col = x$lambda.list
-#       lambda_col[5*(1:ceiling(length(lambda_col)/5))] = round(x$lambda.list[5*(1:ceiling(length(x$lambda.list)/5))], 3)
-#       lambda_col[-5*(1:ceiling(length(lambda_col)/5))] = ""
-#       colnames(val) = lambda_col
-#     } else{
-#       colnames(val) = round(x$lambda.list, 3)
-#     }
-#     rownames(val) = x$s.list
-#     if(is.null(col)) col = heat.colors(nrow(x$ic.all) * ncol(x$ic.all))
-#     if(x$ic.type == "cv"){
-#       pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col, xlab = "lambda", ylab = "model size", main = "Cross-validation error")
-#     } else{
-#       main = x$ic.type
-#       pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col, xlab = "lambda", ylab = "model size", main = main)
-#     }
-#   # powell path
-#   } else{
-#     df_list <- apply(x$beta.all, 2, function(x){sum(ifelse(abs(x) < 1e-8, 0, 1))})
-#     ## line search = sequential
-#     if(x$line.search == "sequential"){
-#       lambda.list = exp(seq(log(x$lambda.max), log(x$lambda.min),length.out = x$nlambda))
-#       s.list = x$s.min : x$s.max
-#       val = matrix(NA, nrow = length(s.list), ncol = x$nlambda)
-#       for(i in 1:length(x$lambda.all)){
-#         print(i)
-#         row_ind = which(s.list == df_list[i])
-#         col_ind = which(Isequal(x$lambda.all[i], lambda.list))
-#         # print(paste("col",col_ind))
-#         if(is.na(val[row_ind, col_ind])){
-#           val[row_ind, col_ind] = x$ic.all[i]
-#         } else{
-#           val[row_ind, col_ind] = pmin(val[row_ind, col_ind], x$ic.all[i])
-#         }
-#       }
-#
-#       if(length(lambda.list>15)){
-#         lambda_col = lambda.list
-#         lambda_col[5*(1:ceiling(length(lambda_col)/5))] = round(lambda.list[5*(1:ceiling(length(lambda.list)/5))], 3)
-#         lambda_col[-5*(1:ceiling(length(lambda_col)/5))] = ""
-#         colnames(val) = lambda_col
-#       } else{
-#         colnames(val) = round(lambda.list, 3)
-#       }
-#       rownames(val) = s.list
-#       if(is.null(col)) col =heat.colors(length(x$lambda.all))
-#       if(x$ic.type == "cv"){
-#         # heatmap(val, Colv=NA, Rowv = NA, scale="none", col = col, xlab = "lambda", ylab = "model size", main = "Cross-validation error")
-#         pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col, xlab = "lambda",
-#                  ylab = "model size", main = "Cross-validation error", na_col = "white")
-#       } else{
-#         main = x$ic.type
-#         # heatmap(val, Colv=NA, Rowv = NA ,scale="none", col = col, xlab = "lambda", ylab = "model size", main = main)
-#         pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col, xlab = "lambda",
-#                  ylab = "model size", main = main, na_col = "white")
-#       }
-#     ## line search = gsection
-#     }else{
-#       lambda.list = exp(seq(log(x$lambda.max), log(x$lambda.min),length.out = 100))
-#       s.list = x$s.min : x$s.max
-#       val = matrix(NA, nrow = length(s.list), ncol = 100)
-#       for(i in 1:length(x$lambda.all)){
-#         lower_ind = which(lambda.list <= x$lambda.all[i])[1]
-#         upper_ind = ifelse(lower_ind + 1 > 100, 100, lower_ind + 1)
-#         col_ind = ifelse(abs(lambda.list[lower_ind] - x$lambda.all[i]) < abs(lambda.list[lower_ind] - x$lambda.all[i]), lower_ind, upper_ind)
-#         row_ind = which(s.list == df_list[i])
-#         if(is.na(val[row_ind, col_ind])){
-#           val[row_ind, col_ind] = x$ic.all[i]
-#         } else{
-#           val[row_ind, col_ind] = pmin(val[row_ind, col_ind], x$ic.all[i])
-#         }
-#       }
-#       lambda_breaks = matrix(lambda.list, nrow = length(lambda.list))
-#       lambda_breaks[5*(1:20)] <-  round(lambda_breaks[5*(1:20)], 3)
-#       lambda_breaks[-(5*(1:20))] <-  ""
-#       colnames(val) <- lambda_breaks
-#       rownames(val) = s.list
-#       #val[which(is.na(val))] = min(x$ic.all - 10)
-#       if(is.null(col)) col = heat.colors(length(x$lambda.all))
-#       if(x$ic.type == "cv"){
-#         pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col,
-#                  xlab = "lambda", ylab = "model size", main = "Cross-validation error", na_col = "white")
-#       } else{
-#         main = x$ic.type
-#         pheatmap(val, cluster_cols = FALSE, cluster_rows = FALSE, scale="none", color = col,
-#                  xlab = "lambda", ylab = "model size", main = main, na_col = "white")
-#       }
-#     }
-#   }
-# }
-
-# Isequal <- function(x, y){
-#   return(ifelse(abs(x-y)<1e-5, TRUE, FALSE))
-# }
-

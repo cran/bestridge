@@ -79,12 +79,11 @@
 #' Denote the first group as \code{1}, the second \code{2}, etc.
 #' If you do not fit a model with a group structure,
 #' please set \code{group.index = NULL}. Default is \code{NULL}.
-#' @param seed Seed to be used to devide the sample into K cross-validation folds. Default is \code{NULL}.
+#' @param seed Seed to be used to divide the sample into K cross-validation folds. Default is \code{NULL}.
 #' @return A list with class attribute 'bsrr' and named components:
 #' \item{beta}{The best fitting coefficients.}
 #'  \item{coef0}{The best fitting
 #' intercept.}
-#' \item{bestmodel}{The best fitted model for \code{type = "bss"}, the class of which is \code{"lm"}, \code{"glm"} or \code{"coxph"}.}
 #' \item{loss}{The training loss of the best fitting model.}
 #' \item{ic}{The information criterion of the best fitting model when model
 #' selection is based on a certain information criterion.} \item{cvm}{The mean
@@ -139,13 +138,9 @@
 #' \item{type}{Either \code{"bss"} or \code{"bsrr"}.}
 #' \item{method}{Method used for tuning parameters selection.}
 #' \item{ic.type}{The criterion of model selection.}
-#' @author Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
+#' @author Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu, Canhong Wen and Xueqin Wang.
 #' @seealso \code{\link{plot.bsrr}}, \code{\link{summary.bsrr}},
-#' \code{\link{coef.bsrr}}, \code{\link{predict.bsrr}}, \code{\link{bsrr.one}}.
-#' @references Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
-#' Package for Best Subset Selection in Linear, Logistic and Cox Proportional
-#' Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
-#' doi:10.18637/jss.v094.i04.
+#' \code{\link{coef.bsrr}}, \code{\link{predict.bsrr}}.
 #' @examples
 #'
 #' #-------------------linear model----------------------#

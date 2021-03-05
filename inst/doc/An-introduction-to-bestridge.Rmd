@@ -5,7 +5,6 @@ vignette: >
   %\VignetteIndexEntry{An introduction to bestridge}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{HCmodelSets}
 bibliography: ref.bib
 ---
 
@@ -49,7 +48,7 @@ library(bestridge)
 data("trim32", package = "bestridge")
 ```
 
-Supposed we wants to fit a best subset ridge regression model with $\lambda$ taking values in 100 grid points from 100 to 0.01 and the model size between $\max \{p, n/\log(n)\}$ (the decimal portion is rounded) and 1, which is the default model size range where $p$ denotes the number of total variables and $n$ the sample size, via Generalized Information Criterion. We call the `bsrr` function as follows:
+Supposed we wants to fit a best subset ridge regression model with $\lambda$ taking values in 100 grid points from 100 to 0.001 and the model size between $\max \{p, n/\log(n)\}$ (the decimal portion is rounded) and 1, which is the default model size range where $p$ denotes the number of total variables and $n$ the sample size, via Generalized Information Criterion. We call the `bsrr` function as follows:
 ```{r}
 y <- trim32[, 1]
 x <- as.matrix(trim32[, -1])
@@ -129,11 +128,11 @@ plot(logi.bsrr)
 
 ### 3.1 Censored response: Cox proportional hazard model
 
-The `bestridge` package also supports studying the relationship between predictors variables and survival time based on the Cox proportional hazard model. We now demonstrate the usage on a real data set, Alizadeh, Eisen, Davis, Ma, Lossos, Rosenwald, Boldrick, Sabet, Tran, Yu et al. (2000)[@alizadeh2000distinct]: gene-expression data in lymphoma patients. There were 240 patients with measurements on 7399 probes.
+The `bestridge` package also supports studying the relationship between predictors variables and survival time based on the Cox proportional hazard model. We now demonstrate the usage on a real data set, Alizadeh, Eisen, Davis, Ma, Lossos, Rosenwald, Boldrick, Sabet, Tran, Yu et al. (2000)[@alizadeh2000distinct]: gene-expression data in lymphoma patients. We illustrate the usage on a subset of the full data set. There were 50 patients with measurements on 1000 probes.
 ```{r, warning=FALSE, message = FALSE}
-data(LymphomaData, package = "HCmodelSets")
+data(patient.data)
 
-x <- t(patient.data$x)
+x <- patient.data$x
 y <- patient.data$time
 status <- patient.data$status
 ```
@@ -143,7 +142,7 @@ To implement the best subset ridge regression on the Cox proportional hazard mod
 cox.bsrr <- bsrr(x, cbind(y, status), family = "cox")
 ```
 
-We use the `summary` function to draw a summary of the fitted `bsrr` object. 28 probes among the total 7399 are selected according to the result.
+We use the `summary` function to draw a summary of the fitted `bsrr` object. 10 probes among the total 1000 are selected according to the result.
 ```{r}
 summary(cox.bsrr)
 ```

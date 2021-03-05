@@ -4,9 +4,9 @@
 \name{bestridge-package}
 \alias{bestridge}
 \alias{bestridge-package}
-\title{bestridge: Best Subset Ridge Regression in Linear, Logistic, Poisson and CoxPH Models}
+\title{bestridge: A Comprehensive R package for Best Subset Selection}
 \description{
-An implementation of best subset ridge regression in generalized linear model and Cox proportional hazard model via the primal dual active set algorithm proposed by Wen, C., Zhang, A., Quan, S. and Wang, X. (2020) <doi:10.18637/jss.v094.i04>. The algorithm formulates coefficient parameters and residuals as primal and dual variables and utilizes efficient active set selection strategies based on the complementarity of the primal and dual variables.
+The bestridge package is designed to provide a one-stand service for users to successfully carry out best ridge regression in various complex situations. This package allows users to perform the regression, classification, count regression and censored regression for (ultra) high dimensional data, and it also supports advanced usages like group variable selection and nuisance variable selection.
 }
 \references{
 Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
