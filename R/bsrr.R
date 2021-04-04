@@ -39,7 +39,7 @@
 #' solve the best subset ridge regression problem. Any unambiguous substring can be given.
 #' @param tune The criterion for choosing the model size and \eqn{L_2} shrinkage
 #' parameters. Available options are \code{"gic"}, \code{"ebic"}, \code{"bic"}, \code{"aic"} and \code{"cv"}.
-#' Default is \code{"gic"}.
+#' Default is \code{"gic"}. \code{"cv"} is recommanded for BSRR.
 #' @param s.list An increasing list of sequential values representing the model
 #' sizes. Only used for \code{method = "sequential"}. Default is \code{1:min(p,
 #' round(n/log(n)))}.
@@ -257,6 +257,7 @@ bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
                  group.index =NULL,
                  seed=NULL){
   type = 'bsrr'
+
   set.seed(seed)
 
   if(missing(s.list)) s.list <- 1:min(ncol(x),round(nrow(x)/log(nrow(x))))
@@ -301,6 +302,24 @@ bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
   } else{
     path_type <- 2
     line.search <- 1
+  }
+  if(path_type == 1 && line.search == 1 && length(lambda.list)== 1 && lambda.list[1] == 0)
+  {
+    cat("BSS with sequential path")
+    type <- 'bss' # sequential for bss
+  }
+  if(path_type == 2 && lambda.min == 0 && lambda.max == 0)
+  {
+    cat("BSS with golden-section path")
+    type <- 'bss' # gsection for bss
+  }
+  change_method <- 0
+  if(path_type == 2 && lambda.min == lambda.max && lambda.min !=0)
+  {
+    cat("Powell method fails when lambda.min equals lambda.min. Run sequential path instead.")
+    path_type <- 1
+    lambda.list <- lambda.min
+    change_method <- 1
   }
   if(!is.null(group.index)){
     if(path_type == 1 & s.list[length(s.list)] > length(group.index)) stop("The maximum one s.list should not be larger than the number of groups!")
@@ -443,9 +462,9 @@ bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
     }
     res.pdas <- bessCpp(x, y, data_type = normalize, weight, is_normal = is_normal, algorithm_type = 1, model_type =  model_type,
                         max_iter = max.iter, exchange_num = 2, path_type = path_type, is_warm_start = warm.start,
-                        ic_type = ic_type, is_cv = is_cv, K = nfolds, state = rep(2,10), sequence = s.list, lambda_seq = 0,
+                        ic_type = ic_type, is_cv = is_cv, K = nfolds, state = rep(2,10), sequence = s.list, lambda_seq = lambda.list,
                         s_min = s.min, s_max = s.max, K_max = 10, epsilon = 10,
-                        lambda_max = 0, lambda_min = 0 , nlambda = nlambda, is_screening = screening, screening_size = screening.num,
+                        lambda_max = lambda.min, lambda_min = lambda.max , nlambda = nlambda, is_screening = screening, screening_size = screening.num,
                         powell_path = 1, g_index=(1:ncol(x)-1), always_select=always.include, tao=1.1)
     beta.pdas <- res.pdas$beta
     names(beta.pdas) <- vn
@@ -466,7 +485,7 @@ bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
     res.pdas$s.list <- s.list
     res.pdas$nsample <- nrow(x)
     res.pdas$algorithm_type <- "PDAS"
-    res.pdas$method <- method
+    res.pdas$method <- ifelse(path_type == 1, "sequential", "gsection")
     res.pdas$type <- type
     res.pdas$ic.type <- ifelse(is_cv == TRUE, "cv", c("AIC", "BIC", "GIC", "EBIC")[ic_type])
     res.pdas$s.max <- s.max
@@ -524,7 +543,7 @@ bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
     res.gpdas$s.list <- s.list
     res.gpdas$nsample <- nrow(x)
     res.gpdas$algorithm_type <- "GPDAS"
-    res.gpdas$method <- method
+    res.gpdas$method <- ifelse(path_type == 1, "sequential", "gsection")
     res.gpdas$type <- type
     res.gpdas$ic.type <- ifelse(is_cv == TRUE, "cv", c("AIC", "BIC", "GIC", "EBIC")[ic_type])
     res.gpdas$s.max <- s.max
@@ -586,7 +605,7 @@ bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
     names(res.gl0l2)[which(names(res.gl0l2)=="coef0_all")] <- 'coef0.all'
     res.gl0l2$nsample <- nrow(x)
     res.gl0l2$algorithm_type <- "GL0L2"
-    res.gl0l2$method <- method
+    res.gl0l2$method <- ifelse(change_method== 1, "sequential", method)
     res.gl0l2$type <- type
     res.gl0l2$line.search <- ifelse(line.search == 1, "gsection", "sequential")
     res.gl0l2$ic.type <- ifelse(is_cv == TRUE, "cv", c("AIC", "BIC", "GIC", "EBIC")[ic_type])
@@ -620,7 +639,7 @@ bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
       y <- y[, 2]
     }
 
-    if(path_type == 1 & lambda.list[1] == 0 & length(lambda.list) == 1) lambda.list <- exp(seq(log(100), log(0.01), length.out = 100))
+    # if(path_type == 1 & lambda.list[1] == 0 & length(lambda.list) == 1) lambda.list <- exp(seq(log(100), log(0.01), length.out = 100))
     res.l0l2 <- bessCpp(x, y, data_type = normalize, weight, is_normal, algorithm_type = 5, model_type =  model_type,
                         max_iter = max.iter, exchange_num = 2, path_type = path_type, is_warm_start = warm.start,
                         ic_type = ic_type, is_cv = is_cv, K = nfolds, state = rep(2,10), sequence = s.list, lambda_seq = lambda.list,
@@ -648,7 +667,7 @@ bsrr <- function(x, y, family = c("gaussian", "binomial", "poisson", "cox"),
     res.l0l2$lambda.list <- lambda.list
     res.l0l2$nsample <- nrow(x)
     res.l0l2$algorithm_type <- "L0L2"
-    res.l0l2$method <- method
+    res.l0l2$method <- ifelse(change_method== 1, "sequential", method)
     res.l0l2$type <- type
     res.l0l2$line.search <- ifelse(line.search == 1, "gsection", "sequential")
     res.l0l2$ic.type <- ifelse(is_cv == TRUE, "cv", c("AIC", "BIC", "GIC", "EBIC")[ic_type])

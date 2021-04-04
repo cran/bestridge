@@ -4,9 +4,9 @@
 \name{bestridge-package}
 \alias{bestridge}
 \alias{bestridge-package}
-\title{bestridge: A Comprehensive R package for Best Subset Selection}
+\title{bestridge: A Comprehensive R Package for Best Subset Selection}
 \description{
-The bestridge package is designed to provide a one-stand service for users to successfully carry out best ridge regression in various complex situations. This package allows users to perform the regression, classification, count regression and censored regression for (ultra) high dimensional data, and it also supports advanced usages like group variable selection and nuisance variable selection.
+The bestridge package is designed to provide a one-stand service for users to successfully carry out best ridge regression in various complex situations via the primal dual active set algorithm proposed by Wen, C., Zhang, A., Quan, S. and Wang, X. (2020) <doi:10.18637/jss.v094.i04>. This package allows users to perform the regression, classification, count regression and censored regression for (ultra) high dimensional data, and it also supports advanced usages like group variable selection and nuisance variable selection.
 }
 \references{
 Wen, C., Zhang, A., Quan, S. and Wang, X. (2020). BeSS: An R
@@ -15,5 +15,5 @@ Hazards Models, \emph{Journal of Statistical Software}, Vol. 94(4).
 doi:10.18637/jss.v094.i04.
 }
 \author{
-Canhong Wen, Aijun Zhang, Shijie Quan, Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang.
+Liyuan Hu, Kangkang Jiang, Yanhang Zhang, Jin Zhu and Xueqin Wang, Canhong Wen.
 }

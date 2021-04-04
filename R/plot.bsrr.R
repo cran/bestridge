@@ -52,7 +52,7 @@ plot.bsrr<-function(x, type=c( "tune", "coefficients"),lambda = NULL, sign.lambd
   type <- match.arg(type)
   if(!is.null(x$bsrr.one)) stop("Plots for object from bsrr.one are not available.")
   if(x$algorithm_type == "GPDAS" | x$algorithm_type == "GL0L2") stop("Plots for group selection are not available now.")
-  if(x$algorithm_type == "PDAS"){
+  if(x$algorithm_type == "PDAS" || length(x$lambda.list)==1){
     type <- match.arg(type)
     # s.list=x$s.list
 
@@ -86,12 +86,12 @@ plot.bsrr<-function(x, type=c( "tune", "coefficients"),lambda = NULL, sign.lambd
     df_list <- apply(beta.all, 2, function(x){sum(ifelse(abs(x) < 1e-6, 0, 1))})
     df_order <- order(df_list)
     df_list <- df_list[df_order]
-    dev <- dev[df_order]
     beta.all <- beta.all[,df_order]
     beta.all <- cbind(rep(0,nrow(beta.all)), beta.all)
 
     if(type=="loss" | type == "tune")
     {
+      dev <- dev[df_order]
       plot_loss(dev,df_list,K,breaks, mar = c(3,4,3,4), ic.type=x$ic.type)
     }
     if(type=="coefficients")
@@ -100,6 +100,7 @@ plot.bsrr<-function(x, type=c( "tune", "coefficients"),lambda = NULL, sign.lambd
     }
     if(type=="both")
     {
+      dev <- dev[df_order]
       layout(matrix(c(1,2),2,1,byrow=TRUE),heights=c(0.45,0.55), widths=1)
       oldpar <- par(las=1, mar=c(2,4,2,4), oma=c(2.5,0.5,1.5,0.5))
       plot_loss(dev,df_list,K,breaks,show_x = FALSE, ic.type = x$ic.type)

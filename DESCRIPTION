@@ -1,11 +1,12 @@
 Package: bestridge
 Type: Package
 Title: A Comprehensive R Package for Best Subset Selection
-Version: 1.0.4
+Version: 1.0.5
 Date: 2021-03-05
 Authors@R: c(
   person(given = "Liyuan", family = "Hu", email = "huly5@mail2.sysu.edu.cn", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-2064-8990")),
   person(given = "Jin", family = "Zhu", email = "zhuj37@mail2.sysu.edu.cn", role = c("aut"), comment = c(ORCID = "0000-0001-8550-5822")),
+  person(given = "Junxian", family="Zhu", email = "zhujx1@mail2.sysu.edu.cn", role=c("aut")),
   person(given = "Kangkang", family = "Jiang", email = "jiangkk3@mail2.sysu.edu.cn" ,role = c("aut")),
   person(given = "Yanhang", family = "Zhang", email = "zhangyh98@ruc.edu.cn", role = c("aut")),
   person(given = "Xueqin", family = "Wang", email = "wangxq20@ustc.edu.cn", role = c("aut"), comment = c(ORCID = "0000-0001-5205-9950")),
@@ -22,12 +23,13 @@ RoxygenNote: 7.1.1
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2021-03-05 07:58:46 UTC; test
+Packaged: 2021-04-04 03:34:52 UTC; test
 Author: Liyuan Hu [aut, cre] (<https://orcid.org/0000-0003-2064-8990>),
   Jin Zhu [aut] (<https://orcid.org/0000-0001-8550-5822>),
+  Junxian Zhu [aut],
   Kangkang Jiang [aut],
   Yanhang Zhang [aut],
   Xueqin Wang [aut] (<https://orcid.org/0000-0001-5205-9950>),
   Canhong Wen [aut]
 Repository: CRAN
-Date/Publication: 2021-03-05 08:40:02 UTC
+Date/Publication: 2021-04-04 04:40:07 UTC
