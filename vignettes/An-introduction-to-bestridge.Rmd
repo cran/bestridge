@@ -76,7 +76,7 @@ x <- as.matrix(duke[, -1])
 
 Supposed we wants to do this classification based on logistic regression with a BSRR model. This can be realized through calling the `bsrr` function with the parameter `family = "binomial` as follows:
 ```{r}
-logi.bsrr <- bsrr(x, y, family = "binomial")
+logi.bsrr <- bsrr(x, y, family = "binomial", method = "sequential")
 ```
 
 Calling the `plot` routine on an `bsrr` object fitted by `type = "bsrr"` will provide a heatmap of GIC of the fitted path. 

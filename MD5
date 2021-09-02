@@ -1,6 +1,6 @@
-4ae91be8539ca6c8a85745bb525e271f *DESCRIPTION
+a721eba6bb1094d75c2e0713b5c3b16f *DESCRIPTION
 8d5f68e476df29b57d3b6a76789bc3e7 *NAMESPACE
-05f4df9b3716457d4b209d3170622e5b *NEWS.md
+e38751dd0f4442853125bec80ef23a53 *NEWS.md
 1117e82bb8116975676df8f557813c02 *R/RcppExports.R
 3c5c4f7ff0568d3f25e90c09a964055c *R/aic.R
 b6106cdf0eb31afe07ec7076fe43b161 *R/bestridge-package.R
@@ -22,9 +22,9 @@ d6fca440eae9d4b52dbe436f24ced547 *data/LymphomaData.rda
 36783a5da6d5d0b3ae5a0b876e8b2f83 *data/datalist
 dd65e152c59ea21d62ce75f1cc66e07c *data/duke.RData
 1e59c13f53e6ca165bdbf27bcc316861 *data/trim32.rda
-2eefe13327e1f80e95db975d05d71ec7 *inst/doc/An-introduction-to-bestridge.R
-923e86f5fa637839695947da5eaf4cfe *inst/doc/An-introduction-to-bestridge.Rmd
-97d63319a144b5e51a424b1540296b6f *inst/doc/An-introduction-to-bestridge.html
+4374978416d9406a38330bb6149933be *inst/doc/An-introduction-to-bestridge.R
+11e04210c3e1b042f3c786b69822a55a *inst/doc/An-introduction-to-bestridge.Rmd
+cef27d2675c3ff8c3fe04475834411d3 *inst/doc/An-introduction-to-bestridge.html
 7d4e26e1c9b1209a5e204c9aabae2314 *man/SAheart.Rd
 c7509ff545f473a8dd4d98eded3ab130 *man/bestridge-package.Rd
 ed05949b4f6df5a7949530b57aa422db *man/bsrr.Rd
@@ -66,7 +66,7 @@ f0f93383aca803ea22d818223683ed4a *src/poisson.h
 6be78bc391412e48af12c7acf0a29be1 *src/screening.h
 a456fbd9f5604c62c990eb7bab4b9dd0 *src/utilities.cpp
 a6fc76dac8d1128cde05e40e68efc61b *src/utilities.h
-923e86f5fa637839695947da5eaf4cfe *vignettes/An-introduction-to-bestridge.Rmd
+11e04210c3e1b042f3c786b69822a55a *vignettes/An-introduction-to-bestridge.Rmd
 9942e659e2da2901691f9abf96d0ff84 *vignettes/lm_n_train_400_p_2000_k_20_cortype_1.png
 ab47ea1d5d3c11c27a049cd15f880b2c *vignettes/logi_n_train_400_p_2000_k_20_cortype_1.png
 93dcd7c2fa473f1cd7da28770b73b241 *vignettes/ref.bib

@@ -1,3 +1,7 @@
+# bestridge 1.0.6
+
+* Update the vignette.
+
 # bestridge 1.0.5
 
 * Allow best subset selection in the bestridge package.

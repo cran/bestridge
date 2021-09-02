@@ -27,7 +27,7 @@ y <- duke$y
 x <- as.matrix(duke[, -1])
 
 ## -----------------------------------------------------------------------------
-logi.bsrr <- bsrr(x, y, family = "binomial")
+logi.bsrr <- bsrr(x, y, family = "binomial", method = "sequential")
 
 ## -----------------------------------------------------------------------------
 plot(logi.bsrr)
