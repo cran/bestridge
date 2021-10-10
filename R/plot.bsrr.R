@@ -52,7 +52,7 @@ plot.bsrr<-function(x, type=c( "tune", "coefficients"),lambda = NULL, sign.lambd
   type <- match.arg(type)
   if(!is.null(x$bsrr.one)) stop("Plots for object from bsrr.one are not available.")
   if(x$algorithm_type == "GPDAS" | x$algorithm_type == "GL0L2") stop("Plots for group selection are not available now.")
-  if(x$algorithm_type == "PDAS" || length(x$lambda.list)==1){
+  if(x$algorithm_type == "PDAS" || (length(x$lambda.all)==1) && length(x$lambda.list)==1){
     type <- match.arg(type)
     # s.list=x$s.list
 

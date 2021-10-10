@@ -1,3 +1,7 @@
+# bestridge 1.0.7
+
+* plot.bsrr debug
+
 # bestridge 1.0.6
 
 * Update the vignette.
